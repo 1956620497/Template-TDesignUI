@@ -1,32 +1,4 @@
 spring:
-  mail:
-    host: smtp.qq.com
-    username: 3467332725@qq.com
-    password: ocunsnqbbqriciid
-  rabbitmq:
-    #消息中间件的地址
-    addresses: 62.234.4.217
-    #addresses: localhost
-    username: zero
-    password: 123456
-    virtual-host: /PersonalPro
-  security:
-    filter:
-      order: -100
-    jwt:
-      # 加密秘钥
-      key: abcde
-      # 过期时间  先设置3天
-      expire: 1
-  data:
-    redis:
-#      host: 62.234.4.217
-#      port: 6379
-#      password: 123456
-      host: 127.0.0.1
-  datasource:
-    url: jdbc:mysql://127.0.0.1:3306/PersonalPro
-    username: root
-    password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  profiles:
+    active: '@environment@'
 

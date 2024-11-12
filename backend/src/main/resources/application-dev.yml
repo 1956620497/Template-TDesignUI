@@ -1,0 +1,67 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mail:
+    host: smtp.qq.com
+    username: 3467332725@qq.com
+    password: ocunsnqbbqriciid
+  rabbitmq:
+    #消息中间件的地址
+    addresses: 62.234.4.217
+    #addresses: localhost
+    username: zero
+    password: 123456
+    virtual-host: /PersonalPro
+  security:
+    filter:
+      order: -100
+    jwt:
+      # 加密秘钥
+      key: abcde
+      # 过期时间，以小时为单位
+      expire: 24
+      # jwt限流
+      limit:
+        # 为用户生成Jwt令牌的冷却时间，防止刷接口频繁登录生成令牌，以秒为单位
+        base: 10
+        # 用户如果继续恶意刷令牌，更严厉的封禁时间
+        upgrade: 300
+        # 判定用户在冷却时间内，继续恶意刷令牌的次数
+        frequency: 30
+  data:
+    redis:
+      #      host: 62.234.4.217
+      #      port: 6379
+      #      password: 123456
+      host: 127.0.0.1
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/PersonalPro
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  web:
+    verify:
+      # 验证邮件发送冷却时间限制，秒为单位
+      mail-limit: 60
+    flow:
+      # 计数时间周期
+      period: 3
+      # 指定时间内最大请求次数限制
+      limit: 50
+      # 超出请求限制封禁的时间
+      block: 30
+    cors:
+      # 允许跨域的请求头，为*就是允许全部，这里填写自己的前端地址
+      origin: "http://127.0.0.1:5173"
+      # 请求是否需要包含凭证，如果为true将会允许跨域请求携带凭证，使客户端在跨域请求中可以访问到受保护的资源
+      credentials: false
+      # 支持的请求方法，为*号就是允许全部的请求方法
+      methods: '*'
+server:
+  port: 8080
+springdoc:
+  paths-to-match: /api/**
+  swagger-ui:
+    operations-sorter: alpha

@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-//自己的过滤器
+/**
+ * 用于对请求头中jwt令牌进行校验的工具，为当前请求添加用户验证信息
+ * 并将用户的ID存放在请求对象属性中，方便后续使用
+ */
 @Component
 public class JwtAuthorizeFilter extends OncePerRequestFilter {
 
@@ -25,7 +27,14 @@ public class JwtAuthorizeFilter extends OncePerRequestFilter {
     @Resource
     JwtUtils utils;
 
-    //编写自定义验证逻辑
+    /**
+     * 编写自定义验证逻辑
+     * @param request  请求
+     * @param response  响应
+     * @param filterChain  放行对象
+     * @throws ServletException  可能的异常
+     * @throws IOException   可能的异常
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

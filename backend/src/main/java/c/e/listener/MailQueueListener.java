@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
+ * 用于处理邮件发送的信息队列监听器
  * 消费者
  * 邮件消费队列
  * 监听mail队列，如果有消息进来时，对该消息进行消费
@@ -27,8 +28,11 @@ public class MailQueueListener {
     @Value("${spring.mail.username}")
     String username;
 
-    //处理邮件发送
-    //发送时用什么类型存储的这里就用什么类型接收
+    /**
+     * 处理邮件发送
+     * 发送时用什么类型存储的这里就用什么类型接收
+     * @param data  邮件信息
+     */
     @RabbitHandler
     public void sendMailMessage(Map<String,Object> data){
         //取出邮件信息
@@ -53,8 +57,13 @@ public class MailQueueListener {
     }
 
 
-
-    //构建邮件
+    /**
+     * 快速封装简单邮件消息实体
+     * @param title  标题
+     * @param content  内容
+     * @param email   收件人
+     * @return   邮件实体
+     */
     private SimpleMailMessage createMessage(String title,String content,String email){
         //构建邮件对象
         SimpleMailMessage message = new SimpleMailMessage();

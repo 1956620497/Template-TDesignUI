@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +31,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> implements AccountService {
+
+    //验证邮件发送冷却时间限制，秒为单位
+    @Value("${spring.web.verify.mail-limit}")
+    int verifyLimit;
 
     //消息中间件
     @Resource
@@ -48,7 +52,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     @Resource
     PasswordEncoder encoder;
 
-    //查询自定义的用户信息
+    /**
+     * 从数据库中通过用户名或邮箱查找用户详细信息
+     * @param username  用户名
+     * @return  用户详细信息
+     * @throws UsernameNotFoundException  如果用户未找到则抛出此异常
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         //查询用户信息
@@ -63,7 +72,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
                 .build();
     }
 
-    //发送邮件
+    /**
+     * 生成注册验证码存入Redis中，并将邮件发送请求提交到消息队列等待发送
+     * @param type   类型
+     * @param email   邮件地址
+     * @param ip   请求IP地址
+     * @return  操作结果，null表示正常，否则为错误原因
+     */
     @Override
     public String registerEmailVerifyCode(String type, String email, String ip) {
         //检查用户是否被封禁,其实这样检测是线程不安全的，如果压力测试同时进入100条数据，将会出问题
@@ -87,9 +102,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     /**
-     * 用户注册
+     * 邮件验证码注册账号操作，需要检查验证码是否正确以及邮箱、用户名是否存在重名
      * @param vo  用户注册信息实体类
-     * @return  是否注册成功
+     * @return  是否注册成功，null为正常，否则为错误原因
      */
     @Override
     public String registerEmailAccount(EmailRegisterVO vo) {
@@ -105,7 +120,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         if (this.existsAccountByEmail(email)) return "此电子邮件已被其他用户注册";
         if (this.existsAccountByUsername(username)) return "此用户名已被其他人注册，请更换一个新的用户名";
         String password = encoder.encode(vo.getPassword());
-        Account account = new Account(null,username,password,email,"user",new Date());
+        Account account = new Account(null,username,password,email,Const.ROLE_DEFAULT,new Date());
         if (this.save(account)) {
             stringRedisTemplate.delete(key);
             return null;
@@ -116,9 +131,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     /**
-     * 验证重置密码的验证码是否正确
+     * 重置密码的确认操作，验证验证码是否正确
      * @param vo   重置密码的请求验证码实体类
-     * @return  是否成功
+     * @return  操作结果，null表示正常，否则为错误原因
      */
     @Override
     public String resetConfirm(ConfirmResetVO vo) {
@@ -135,7 +150,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     /**
      * 重置密码操作
      * @param vo  重置密码的参数信息实体类
-     * @return  是否成功
+     * @return  操作结果，null表示正常，否则为错误原因
      */
     @Override
     public String resetEmailAccountPassword(EmailResetVO vo) {
@@ -194,7 +209,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     private boolean verifyLimit(String ip){
         String key = Const.VERIFY_EMAIL_LIMIT + ip;
-        return utils.limitOnceCheck(key,60);
+        return utils.limitOnceCheck(key,verifyLimit);
     }
 
 

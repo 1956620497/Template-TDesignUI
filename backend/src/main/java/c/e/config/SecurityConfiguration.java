@@ -7,10 +7,8 @@ import c.e.filter.JwtAuthorizeFilter;
 import c.e.service.AccountService;
 import c.e.utils.JwtUtils;
 import jakarta.annotation.Resource;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,13 +19,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
-//配置安全框架
+/**
+ * SpringSecurity相关配置
+ */
 @Configuration
 public class SecurityConfiguration {
 
@@ -44,7 +43,8 @@ public class SecurityConfiguration {
 
     /**
      * Security的过滤器链
-     * @return
+     * @param http 配置器
+     * @return  自动构建的内置过滤器链
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -94,8 +94,13 @@ public class SecurityConfiguration {
     }
 
 
-
-    //配置登录成功处理
+    /**
+     * 配置登录成功处理
+     * @param request  请求
+     * @param response  响应
+     * @param authentication  验证信息
+     * @throws IOException  可能出现的异常
+     */
     public void onAuthenticationSuccess(HttpServletRequest request,   //请求
                                         HttpServletResponse response,  //响应
                                         Authentication authentication  //验证信息
@@ -121,7 +126,13 @@ public class SecurityConfiguration {
         response.getWriter().write(RestBean.success(vo).asJsonString());
     }
 
-    //配置登录失败的处理
+    /**
+     * 配置登录失败的处理
+     * @param request  请求
+     * @param response  响应
+     * @param exception   异常信息
+     * @throws IOException 可能出现的异常
+     */
     public void onAuthenticationFailure(HttpServletRequest request,  // 请求
                                         HttpServletResponse response,  //响应
                                         AuthenticationException exception  //异常信息
@@ -132,7 +143,14 @@ public class SecurityConfiguration {
         response.getWriter().write(RestBean.unauthorized(exception.getMessage()).asJsonString());
     }
 
-    //权限不够时
+
+    /**
+     * 权限不够时
+     * @param request  请求
+     * @param response  响应
+     * @param accessDeniedException  访问被拒绝
+     * @throws IOException 可能的异常
+     */
     public void onAccessDeny(HttpServletRequest request,
                              HttpServletResponse response,
                              AccessDeniedException accessDeniedException) throws IOException {
@@ -142,7 +160,13 @@ public class SecurityConfiguration {
         response.getWriter().write(RestBean.forbidden(accessDeniedException.getMessage()).asJsonString());
     }
 
-    //未验证时
+    /**
+     * 未验证时
+     * @param request  请求
+     * @param response  响应
+     * @param exception  异常信息
+     * @throws IOException  可能出现的异常
+     */
     public void onUnauthorized(HttpServletRequest request,  // 请求
                                HttpServletResponse response,  //响应
                                AuthenticationException exception  //异常信息
@@ -154,7 +178,13 @@ public class SecurityConfiguration {
     }
 
 
-    //退出登录成功的处理
+    /**
+     * 退出登录成功的处理，将对应的JWT令牌列入黑名单不再使用
+     * @param request  请求
+     * @param response   响应
+     * @param authentication   用户的认证信息
+     * @throws IOException   可能出现的异常
+     */
     public void onLogoutSuccess(HttpServletRequest request,
                                 HttpServletResponse response,
                                 Authentication authentication) throws IOException {
