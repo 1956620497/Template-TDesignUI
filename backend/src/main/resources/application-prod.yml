@@ -4,22 +4,22 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
   mail:
-    host: smtp.qq.com
-    username: 3467332725@qq.com
-    password: ocunsnqbbqriciid
+    host:
+    username:
+    password:
   rabbitmq:
     #消息中间件的地址
-    addresses: 62.234.4.217
+    addresses:
     #addresses: localhost
-    username: zero
-    password: 123456
-    virtual-host: /PersonalPro
+    username:
+    password:
+    virtual-host:
   security:
     filter:
       order: -100
     jwt:
       # 加密秘钥
-      key: abcde
+      key:
       # 过期时间，以小时为单位
       expire: 24
       # jwt限流
@@ -32,14 +32,14 @@ spring:
         frequency: 30
   data:
     redis:
-      #      host: 62.234.4.217
-      #      port: 6379
-      #      password: 123456
+      #      host:
+      #      port:
+      #      password:
       host: 127.0.0.1
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/PersonalPro
-    username: root
-    password: 123456
+    username:
+    password:
     driver-class-name: com.mysql.cj.jdbc.Driver
   web:
     verify:
